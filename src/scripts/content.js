@@ -41,16 +41,17 @@ async function convertSearchTextToAdvancedPrompt(searchContent) {
   const systemInstruction = `
 You are an expert at rewriting basic search queries into highly effective Google search queries using advanced search operators.
 
-Given a simple query, transform it into a more precise and powerful search query by:
+Given a simple query, decide whether it is already advanced enough. If it is not, transform it into a more precise and powerful search query by:
 - Adding quotes for exact phrases when appropriate
 - Using site:, filetype:, intitle:, inurl:, OR, and - (exclude) operators when useful
-- Inferring user intent (e.g., academic, tutorial, product, troubleshooting)
+- Inferring user intent such as academic, tutorial, product, or troubleshooting
 - Making the query more specific and targeted
 
 Rules:
-- Output ONLY the improved search query
+- Return valid JSON matching the provided schema
+- If the query is already advanced enough, set isUserQueryAlreadyAdvanced to true and keep advancedPrompt equal to the original query
+- If clarification would help produce a better query, populate listOfQuestionsToAskUserForBetterPrompt with short, specific questions
 - Do not include explanations
-- Keep it concise but powerful
 
 Original query: "${searchContent}"
 `;
@@ -95,17 +96,19 @@ function buildQuestionId(question, index) {
 }
 
 async function createAdvancedPromptFromUserResponses(searchContent, userResponses){
-  const advanedPromptFromUserResponsesInstruction = `You are an expert at rewriting basic search queries into highly effective Google search queries using advanced search operators, based on user responses to clarifying questions.
+  const advanedPromptFromUserResponsesInstruction = `You are an expert at rewriting search queries into highly effective Google search queries using advanced search operators.
 
-Given the original search query and the user's responses to the clarifying questions, transform the original query into a more precise and powerful search query by:
-
+Given the original search query and the user's answers to clarifying questions, transform the query into a more precise and powerful search query by:
 - Adding quotes for exact phrases when appropriate
 - Using site:, filetype:, intitle:, inurl:, OR, and - (exclude) operators when useful
-- Inferring user intent (e.g., academic, tutorial, product, troubleshooting)
+- Inferring user intent such as academic, tutorial, product, or troubleshooting
 - Making the query more specific and targeted
+
 Rules:
-- Output ONLY the improved search query
+- Return valid JSON matching the provided schema
+- Output only the improved search query in the advancedPrompt field
 - Do not include explanations
+
 Original query: "${searchContent}"
 User responses to clarifying questions: ${JSON.stringify(userResponses)}
 `;

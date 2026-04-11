@@ -132,8 +132,12 @@ User responses to clarifying questions: ${JSON.stringify(userResponses)}
   });
   const schemaAdvancedPromptData = JSON.parse(completionCreateResponse.choices[0].message.content);
   const advancedPrompt = schemaAdvancedPromptData.advancedPrompt;
-
-  cache.set(searchContent, advancedPrompt);
+  const result = {
+    advancedPrompt: advancedPrompt,
+    questionsToAskUserForBetterPrompt: [],
+    isUserQueryAlreadyAdvanced: true,
+  };
+  cache.set(searchContent, result);
   setTimeout(() => cache.delete(searchContent), 60 * 1000);
   return advancedPrompt;
 }

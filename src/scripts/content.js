@@ -72,7 +72,6 @@ Original query: "${searchContent}"
     },
   });
   const schemaAdvancedPromptData = JSON.parse(completionCreateResponse.choices[0].message.content);
-  console.log("Received response from Cerebras API: ", schemaAdvancedPromptData);
   const advancedPrompt = schemaAdvancedPromptData.advancedPrompt;
   const isAlreadyAdvanced = schemaAdvancedPromptData.isUserQueryAlreadyAdvanced;
   const questionsToAskUserForBetterPrompt =
@@ -132,12 +131,10 @@ User responses to clarifying questions: ${JSON.stringify(userResponses)}
     },
   });
   const schemaAdvancedPromptData = JSON.parse(completionCreateResponse.choices[0].message.content);
-  console.log("Received response from Cerebras API changed: ", schemaAdvancedPromptData);
   const advancedPrompt = schemaAdvancedPromptData.advancedPrompt;
 
   cache.set(searchContent, advancedPrompt);
   setTimeout(() => cache.delete(searchContent), 60 * 1000);
-  console.log("returning advanced prompt", advancedPrompt);
   return advancedPrompt;
 }
 
@@ -182,7 +179,6 @@ function showForm(questions = [], searchText) {
       return;
     }
 
-    console.log("Calling dismiss form");
     abortController.abort();
     shadowHost.remove();
   };
@@ -226,19 +222,12 @@ function showForm(questions = [], searchText) {
     try {
       const formData = new FormData(formElement);
       const userResponsesToQuestions = Object.fromEntries(formData.entries());
-      console.log("User responses to clarifying questions: ", userResponsesToQuestions);
       const advancedPrompt = await createAdvancedPromptFromUserResponses(
         searchText,
         userResponsesToQuestions,
       );
-      console.log(
-        "Advanced prompt generated from user responses: ",
-        advancedPrompt,
-        searchInputElement,
-      );
       searchInputElement.value = advancedPrompt;
       setFormLoadingState(false);
-      console.log("Calling dismiss form function");
       dismissForm();
     } catch (error) {
       setFormLoadingState(false);
@@ -273,7 +262,6 @@ async function setEnhancedPromptToSearchInput(
   try {
     const searchContent = searchInputElement.value;
     const result = await functionToCallForEnhancingPrompt(searchContent);
-    console.log("Result from advanced prompt conversion: ", result);
     if (result.questionsToAskUserForBetterPrompt?.length) {
       showForm(result.questionsToAskUserForBetterPrompt, searchContent);
     }

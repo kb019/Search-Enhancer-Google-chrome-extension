@@ -47,6 +47,8 @@ const form =
     width: min(100%, 420px);
     border-radius: 24px;
     overflow: hidden;
+    overflow-y:scroll;
+    height: 70vh;
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.98));
     border: 1px solid rgba(148, 163, 184, 0.22);

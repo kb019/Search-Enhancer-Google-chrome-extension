@@ -1,6 +1,8 @@
 import Cerebras from '@cerebras/cerebras_cloud_sdk';
 import {form,icon} from '../templates.js';
 
+let searchInputElement = document.querySelector("textarea");
+
 const cache = new Map();
 
 const client = new Cerebras({
@@ -20,6 +22,15 @@ const advancedPromptSchema = {
     required: ["advancedPrompt", "isUserQueryAlreadyAdvanced", "listOfQuestionsToAskUserForBetterPrompt"],
     additionalProperties: false
 };
+
+const advanedPromptSchemaToUserQueries = {
+  type: "object",
+  properties: {
+     advancedPrompt: { type: "string" },
+  },
+  required: ["advancedPrompt"],
+  additionalProperties: false
+}
 
 async function convertSearchTextToAdvancedPrompt(searchContent) {
   const cacheResult = cache.get(searchContent);
@@ -83,7 +94,44 @@ function buildQuestionId(question, index) {
   return `prompt-question-${normalizedQuestion || "item"}-${index}`;
 }
 
-function showForm(questions = []){
+async function createAdvancedPromptFromUserResponses(searchContent, userResponses){
+  const advanedPromptFromUserResponsesInstruction = `You are an expert at rewriting basic search queries into highly effective Google search queries using advanced search operators, based on user responses to clarifying questions.
+
+Given the original search query and the user's responses to the clarifying questions, transform the original query into a more precise and powerful search query by:
+
+- Adding quotes for exact phrases when appropriate
+- Using site:, filetype:, intitle:, inurl:, OR, and - (exclude) operators when useful
+- Inferring user intent (e.g., academic, tutorial, product, troubleshooting)
+- Making the query more specific and targeted
+Rules:
+- Output ONLY the improved search query
+- Do not include explanations
+Original query: "${searchContent}"
+User responses to clarifying questions: ${JSON.stringify(userResponses)}
+`;
+    const completionCreateResponse = await client.chat.completions.create({
+    messages: [{ role: 'user', content: advanedPromptFromUserResponsesInstruction }],
+    model: 'qwen-3-235b-a22b-instruct-2507',
+    response_format: {
+      type: 'json_schema', 
+      json_schema: {
+        name: 'advanced_prompt_schema_to_user_queries',
+        strict: true,
+        schema: advanedPromptSchemaToUserQueries
+      }
+    }
+  });
+  const schemaAdvancedPromptData = JSON.parse(completionCreateResponse.choices[0].message.content);
+  console.log("Received response from Cerebras API changed: ", schemaAdvancedPromptData);
+  const advancedPrompt = schemaAdvancedPromptData.advancedPrompt;
+  
+  cache.set(searchContent, advancedPrompt);
+  setTimeout(() => cache.delete(searchContent), 60 * 1000);
+  console.log("returning advanced prompt", advancedPrompt);
+  return advancedPrompt;
+}
+
+function showForm(questions = [],searchText){
   const existingFormHost = document.querySelector("#prompt-enhancer-form-host");
   existingFormHost?.remove();
 
@@ -97,6 +145,7 @@ function showForm(questions = []){
   const formElement = shadowRoot.querySelector("#prompt-enhancer-form");
   const abortController = new AbortController();
   const dismissForm = () => {
+    console.log("Calling dismiss form");
     abortController.abort();
     shadowHost.remove();
   };
@@ -129,11 +178,15 @@ function showForm(questions = []){
       dismissForm();
     }
   });
-  formElement.addEventListener("submit", (event) => {
+  formElement.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(formElement);
     const userResponsesToQuestions = Object.fromEntries(formData.entries());
     console.log("User responses to clarifying questions: ", userResponsesToQuestions);
+    const advancedPrompt = await createAdvancedPromptFromUserResponses(searchText, userResponsesToQuestions);
+    console.log("Advanced prompt generated from user responses: ", advancedPrompt,searchInputElement);
+    searchInputElement.value = advancedPrompt;
+    console.log("Calling dismiss form function");
     dismissForm();
   });
 
@@ -147,13 +200,31 @@ function showForm(questions = []){
   shadowRoot.querySelector(".prompt-enhancer-input")?.focus();
 }
 
+async function setEnhancedPromptToSearchInput(promptEnhancerElement, searchInputElement,functionToCallForEnhancingPrompt){
+  promptEnhancerElement.classList.add("loading");
+        try{
+        const searchContent = searchInputElement.value;
+        const result = await functionToCallForEnhancingPrompt(searchContent);
+        console.log("Result from advanced prompt conversion: ", result);
+        if(result.questionsToAskUserForBetterPrompt?.length){
+          showForm(result.questionsToAskUserForBetterPrompt, searchContent);
+        }
+        searchInputElement.value = result.advancedPrompt;
 
-async function enhanceGoogleSearchPrompt(element){
-  if(!element){
+        } catch (error) {
+          alert("Error enhancing the search prompt. Please try again.");
+          console.error("Error enhancing the search prompt: ", error?.error?.message || error.message || "Please try again.");
+        } finally {
+           promptEnhancerElement.classList.remove("loading");
+        }
+}
+
+ function enhanceGoogleSearchPrompt(searchInputElement){
+  if(!searchInputElement){
     console.error("Not able to find the search input element.");
     return;
   }
-    const parentElement = element.parentElement;
+    const parentElement = searchInputElement.parentElement;
     parentElement.style.position = "relative";
     parentElement.appendChild(promptEnhancerElement);
     parentElement.addEventListener("click", async (event) => {
@@ -162,26 +233,12 @@ async function enhanceGoogleSearchPrompt(element){
       }
 
       
-        promptEnhancerElement.classList.add("loading");
-        try{
-        const searchContent = element.value;
-        const result = await convertSearchTextToAdvancedPrompt(searchContent);
-        console.log("Result from advanced prompt conversion: ", result);
-        if(result.questionsToAskUserForBetterPrompt.length > 0){
-          showForm(result.questionsToAskUserForBetterPrompt);
-        }
-        element.value = result.advancedPrompt;
-
-        } catch (error) {
-          alert("Error enhancing the search prompt. Please try again.");
-          console.error("Error enhancing the search prompt: ", error?.error?.message || error.message || "Please try again.");
-        } finally {
-           promptEnhancerElement.classList.remove("loading");
-        }
+      await setEnhancedPromptToSearchInput(promptEnhancerElement, searchInputElement, convertSearchTextToAdvancedPrompt);
     });
 
 
 }
 
 
-enhanceGoogleSearchPrompt(document.querySelector("textarea"));
+
+enhanceGoogleSearchPrompt(searchInputElement);

@@ -14,5 +14,8 @@ module.exports = (config) => {
         "process.env": JSON.stringify(process.env),
       }),
     ],
+    optimization: {
+      minimize: false,
+    },
   };
 };

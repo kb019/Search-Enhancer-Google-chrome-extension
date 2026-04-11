@@ -1,20 +1,13 @@
-const icon = `<svg width="27" height="27" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-//   <!-- Background circle -->
-//   <circle cx="12" cy="12" r="10" fill="#F1F3F4"/>
-
-//   <!-- Sliders -->
-//   <line x1="7" y1="9" x2="13" y2="9" stroke="#EA4335" stroke-width="1.5" stroke-linecap="round"/>
-//   <circle cx="10" cy="9" r="1.5" fill="#EA4335"/>
-
-//   <line x1="7" y1="12" x2="13" y2="12" stroke="#FBBC05" stroke-width="1.5" stroke-linecap="round"/>
-//   <circle cx="9" cy="12" r="1.5" fill="#FBBC05"/>
-
-//   <line x1="7" y1="15" x2="13" y2="15" stroke="#34A853" stroke-width="1.5" stroke-linecap="round"/>
-//   <circle cx="11" cy="15" r="1.5" fill="#34A853"/>
-
-//   <!-- Magnifying glass -->
-//   <circle cx="13.5" cy="13.5" r="4" stroke="#4285F4" stroke-width="1.8"/>
-//   <line x1="16.5" y1="16.5" x2="19" y2="19" stroke="#4285F4" stroke-width="1.8" stroke-linecap="round"/>
+const icon = `<svg width="27" height="27" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <circle cx="10.5" cy="10.5" r="4.75" stroke="#F8FAFC" stroke-width="1.8"/>
+  <path d="M14.2 14.2L18 18" stroke="#F8FAFC" stroke-width="1.8" stroke-linecap="round"/>
+  <path
+    d="M15.75 4.75L16.35 6.65L18.25 7.25L16.35 7.85L15.75 9.75L15.15 7.85L13.25 7.25L15.15 6.65L15.75 4.75Z"
+    stroke="#F8FAFC"
+    stroke-width="1.4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
 </svg>`;
 
 const form = `<style>

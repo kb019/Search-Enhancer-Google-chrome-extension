@@ -1,27 +1,27 @@
 @property --pos {
-  syntax: '<angle>';
+  syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
 }
 
 #prompt-enhancer-icon {
-   position: absolute;
-    top :50%;
-    transform : translateY(-50%);
-    right: 8px;
-    cursor: pointer;
-    border-radius: 50%;
-    padding: 1px;
-    overflow: hidden;
-    border: none;
-    background-image: conic-gradient(from var(--pos) at 50% 50%, #3acfd5, #3a4ed5, #3acfd5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 1px;
+  overflow: hidden;
+  border: none;
+  background-image: conic-gradient(from var(--pos) at 50% 50%, #3acfd5, #3a4ed5, #3acfd5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .loading {
-    animation: 1s linear 0s infinite rotate;
+  animation: 1s linear 0s infinite rotate;
 }
 
 @keyframes rotate {

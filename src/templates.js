@@ -1,4 +1,4 @@
-const icon =`<svg width="27" height="27" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+const icon = `<svg width="27" height="27" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 //   <!-- Background circle -->
 //   <circle cx="12" cy="12" r="10" fill="#F1F3F4"/>
 
@@ -15,10 +15,9 @@ const icon =`<svg width="27" height="27" viewBox="0 0 24 24" fill="none" xmlns="
 //   <!-- Magnifying glass -->
 //   <circle cx="13.5" cy="13.5" r="4" stroke="#4285F4" stroke-width="1.8"/>
 //   <line x1="16.5" y1="16.5" x2="19" y2="19" stroke="#4285F4" stroke-width="1.8" stroke-linecap="round"/>
-</svg>`
+</svg>`;
 
-const form =
-`<style>
+const form = `<style>
   :host {
     position: fixed;
     inset: 0;
@@ -322,7 +321,6 @@ const form =
       </div>
     </div>
   </div>
-</div>`
-
+</div>`;
 
 export { icon, form };

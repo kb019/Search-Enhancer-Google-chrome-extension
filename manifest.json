@@ -16,7 +16,7 @@
     {
       "js": ["dist/content.bundle.js"],
       "css": ["styles/content.css"],
-      "matches": ["<all_urls>"],
+      "matches": ["https://www.google.com/*"],
       "run_at": "document_idle",
       "world": "MAIN"
     }

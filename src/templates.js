@@ -44,6 +44,7 @@ const form =
   }
 
   .prompt-enhancer-card {
+    position: relative;
     width: min(100%, 420px);
     border-radius: 24px;
     overflow: hidden;
@@ -212,6 +213,66 @@ const form =
     box-shadow: 0 14px 24px rgba(37, 99, 235, 0.24);
   }
 
+  .prompt-enhancer-primary[disabled],
+  .prompt-enhancer-secondary[disabled],
+  .prompt-enhancer-close[disabled] {
+    cursor: not-allowed;
+    opacity: 0.72;
+    transform: none;
+  }
+
+  .prompt-enhancer-loading {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(248, 250, 252, 0.78);
+    backdrop-filter: blur(6px);
+  }
+
+  .prompt-enhancer-card.is-loading .prompt-enhancer-loading {
+    display: flex;
+  }
+
+  .prompt-enhancer-loading-content {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+    color: #1e293b;
+  }
+
+  .prompt-enhancer-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(37, 99, 235, 0.18);
+    border-top-color: #2563eb;
+    border-radius: 999px;
+    animation: prompt-enhancer-spin 0.8s linear infinite;
+  }
+
+  .prompt-enhancer-loading-text {
+    margin: 0;
+    font-size: 0.94rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .prompt-enhancer-card.is-loading .prompt-enhancer-question-list,
+  .prompt-enhancer-card.is-loading .prompt-enhancer-actions,
+  .prompt-enhancer-card.is-loading .prompt-enhancer-question-count,
+  .prompt-enhancer-card.is-loading .prompt-enhancer-subtitle {
+    opacity: 0.5;
+  }
+
+  @keyframes prompt-enhancer-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   @media (max-width: 640px) {
     .prompt-enhancer-overlay {
       padding: 16px;
@@ -254,6 +315,12 @@ const form =
         <button type="submit" class="prompt-enhancer-primary">Apply</button>
       </div>
     </form>
+    <div class="prompt-enhancer-loading" id="prompt-enhancer-loading" aria-live="polite" aria-hidden="true">
+      <div class="prompt-enhancer-loading-content">
+        <div class="prompt-enhancer-spinner" aria-hidden="true"></div>
+        <p class="prompt-enhancer-loading-text">Refining your search prompt...</p>
+      </div>
+    </div>
   </div>
 </div>`
 

@@ -143,8 +143,31 @@ function showForm(questions = [],searchText){
   const questionCount = shadowRoot.querySelector("#prompt-enhancer-question-count");
   const overlay = shadowRoot.querySelector("#prompt-enhancer-overlay");
   const formElement = shadowRoot.querySelector("#prompt-enhancer-form");
+  const cardElement = shadowRoot.querySelector(".prompt-enhancer-card");
+  const closeButton = shadowRoot.querySelector("#prompt-enhancer-close");
+  const cancelButton = shadowRoot.querySelector("#prompt-enhancer-cancel");
+  const submitButton = shadowRoot.querySelector(".prompt-enhancer-primary");
+  const loadingElement = shadowRoot.querySelector("#prompt-enhancer-loading");
   const abortController = new AbortController();
+  let isSubmitting = false;
+  const setFormLoadingState = (loading) => {
+    isSubmitting = loading;
+    cardElement.classList.toggle("is-loading", loading);
+    formElement.setAttribute("aria-busy", String(loading));
+    loadingElement.setAttribute("aria-hidden", String(!loading));
+
+    [closeButton, cancelButton, submitButton, ...questionList.querySelectorAll(".prompt-enhancer-input")]
+      .forEach((element) => {
+        if (element) {
+          element.disabled = loading;
+        }
+      });
+  };
   const dismissForm = () => {
+    if (isSubmitting) {
+      return;
+    }
+
     console.log("Calling dismiss form");
     abortController.abort();
     shadowHost.remove();
@@ -171,27 +194,40 @@ function showForm(questions = [],searchText){
     questionList.appendChild(questionElementContainer);
   });
 
-  shadowRoot.querySelector("#prompt-enhancer-close").addEventListener("click", dismissForm);
-  shadowRoot.querySelector("#prompt-enhancer-cancel").addEventListener("click", dismissForm);
+  closeButton.addEventListener("click", dismissForm);
+  cancelButton.addEventListener("click", dismissForm);
   overlay.addEventListener("click", (event) => {
-    if (event.target === overlay) {
+    if (event.target === overlay && !isSubmitting) {
       dismissForm();
     }
   });
   formElement.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const formData = new FormData(formElement);
-    const userResponsesToQuestions = Object.fromEntries(formData.entries());
-    console.log("User responses to clarifying questions: ", userResponsesToQuestions);
-    const advancedPrompt = await createAdvancedPromptFromUserResponses(searchText, userResponsesToQuestions);
-    console.log("Advanced prompt generated from user responses: ", advancedPrompt,searchInputElement);
-    searchInputElement.value = advancedPrompt;
-    console.log("Calling dismiss form function");
-    dismissForm();
+    if (isSubmitting) {
+      return;
+    }
+
+    setFormLoadingState(true);
+
+    try {
+      const formData = new FormData(formElement);
+      const userResponsesToQuestions = Object.fromEntries(formData.entries());
+      console.log("User responses to clarifying questions: ", userResponsesToQuestions);
+      const advancedPrompt = await createAdvancedPromptFromUserResponses(searchText, userResponsesToQuestions);
+      console.log("Advanced prompt generated from user responses: ", advancedPrompt,searchInputElement);
+      searchInputElement.value = advancedPrompt;
+      setFormLoadingState(false);
+      console.log("Calling dismiss form function");
+      dismissForm();
+    } catch (error) {
+      setFormLoadingState(false);
+      alert("Error refining the prompt from your answers. Please try again.");
+      console.error("Error refining prompt from form responses: ", error?.error?.message || error.message || "Please try again.");
+    }
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
+    if (event.key === "Escape" && !isSubmitting) {
       dismissForm();
     }
   }, { signal: abortController.signal });
